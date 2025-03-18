@@ -153,12 +153,12 @@
       player4: "Joueur 4"
     };
 
-    // Affectation des noms aux éléments correspondants et initialisation de la pile d'annulation
+    // Affectation des noms aux éléments et initialisation de la dernière modification
     document.querySelectorAll('.player').forEach((player, index) => {
       const nameElem = player.querySelector('.playerName');
       nameElem.textContent = playerNames['player' + (index + 1)];
-      // On initialise la pile avec le score initial (0)
-      player.undoStack = [0];
+      // Initialise lastChange pour chaque joueur
+      player.lastChange = 0;
     });
 
     // Création d'une croix animée en SVG (animation ligne par ligne)
@@ -198,35 +198,37 @@
       }
     }
 
-    // Gestion des boutons pour la modification du score et annulation du dernier changement
+    // Gestion des boutons pour modification du score et effacer la dernière modification
     document.querySelectorAll('.player').forEach(player => {
       updateDisplay(player);
       player.querySelectorAll('.buttons button').forEach(button => {
         button.addEventListener('click', () => {
-          // Bouton "Effacer" pour annuler la dernière modification
           if (button.hasAttribute('data-undo')) {
-            if (player.undoStack.length > 1) {
-              // Retire le dernier score et revient à l'état précédent
-              player.undoStack.pop();
-              let previousScore = player.undoStack[player.undoStack.length - 1];
-              player.setAttribute('data-score', previousScore);
+            // Si une dernière modification a été enregistrée, on la soustrait du score
+            if (player.lastChange !== 0) {
+              let currentScore = parseInt(player.getAttribute('data-score'));
+              currentScore -= player.lastChange;
+              player.setAttribute('data-score', currentScore);
               updateDisplay(player);
+              // Réinitialise la dernière modification pour éviter un double effacement
+              player.lastChange = 0;
             }
           } else {
-            // Sauvegarde l'état actuel avant modification
-            let currentScore = parseInt(player.getAttribute('data-score'));
-            // On ajoute le score actuel à la pile d'annulation
-            player.undoStack.push(currentScore);
+            let addition = 0;
             if (button.hasAttribute('data-custom')) {
               let customValue = prompt("Entrez une valeur personnalisée :");
               if (customValue !== null && !isNaN(customValue)) {
-                currentScore += parseInt(customValue);
+                addition = parseInt(customValue);
               }
             } else {
-              currentScore += parseInt(button.getAttribute('data-value'));
+              addition = parseInt(button.getAttribute('data-value'));
             }
+            let currentScore = parseInt(player.getAttribute('data-score'));
+            currentScore += addition;
             player.setAttribute('data-score', currentScore);
             updateDisplay(player);
+            // Enregistre cette modification comme dernière opération
+            player.lastChange = addition;
           }
         });
       });

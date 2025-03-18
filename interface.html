@@ -11,12 +11,14 @@
       background-size: cover;
       font-family: 'Courier New', Courier, monospace;
       color: #fff;
+      position: relative;
     }
     .container {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 50vh);
       height: 100vh;
+      gap: 10px; /* Add gap between grid items */
     }
     .player {
       border: 2px solid rgba(255,255,255,0.8);
@@ -88,9 +90,41 @@
         stroke-dashoffset: 0;
       }
     }
+    /* Add intersecting lines */
+    .horizontal-line, .vertical-line {
+      position: absolute;
+      background-color: yellow;
+      z-index: 1;
+    }
+    .horizontal-line {
+      top: 50%;
+      left: 0;
+      width: 0;
+      height: 5px;
+      animation: growHorizontal 2s forwards;
+    }
+    .vertical-line {
+      top: 0;
+      left: 50%;
+      width: 5px;
+      height: 0;
+      animation: growVertical 2s forwards;
+    }
+    @keyframes growHorizontal {
+      to {
+        width: 100%;
+      }
+    }
+    @keyframes growVertical {
+      to {
+        height: 100%;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="horizontal-line"></div>
+  <div class="vertical-line"></div>
   <div class="container">
     <!-- Sections pour les 4 joueurs -->
     <div class="player" id="player1" data-score="0">
@@ -101,7 +135,6 @@
         <button data-value="30">+30</button>
         <button data-value="100">+100</button>
         <button data-custom="true">+</button>
-        <button data-undo="true">Effacer</button>
       </div>
       <div class="stars"></div>
     </div>
@@ -113,7 +146,6 @@
         <button data-value="30">+30</button>
         <button data-value="100">+100</button>
         <button data-custom="true">+</button>
-        <button data-undo="true">Effacer</button>
       </div>
       <div class="stars"></div>
     </div>
@@ -125,7 +157,6 @@
         <button data-value="30">+30</button>
         <button data-value="100">+100</button>
         <button data-custom="true">+</button>
-        <button data-undo="true">Effacer</button>
       </div>
       <div class="stars"></div>
     </div>
@@ -137,7 +168,6 @@
         <button data-value="30">+30</button>
         <button data-value="100">+100</button>
         <button data-custom="true">+</button>
-        <button data-undo="true">Effacer</button>
       </div>
       <div class="stars"></div>
     </div>
@@ -153,12 +183,10 @@
       player4: "Joueur 4"
     };
 
-    // Affectation des noms aux éléments et initialisation de la dernière modification
+    // Affectation des noms aux éléments correspondants
     document.querySelectorAll('.player').forEach((player, index) => {
       const nameElem = player.querySelector('.playerName');
       nameElem.textContent = playerNames['player' + (index + 1)];
-      // Initialise lastChange pour chaque joueur
-      player.lastChange = 0;
     });
 
     // Création d'une croix animée en SVG (animation ligne par ligne)
@@ -198,38 +226,22 @@
       }
     }
 
-    // Gestion des boutons pour modification du score et effacer la dernière modification
+    // Ajout des événements sur les boutons pour la mise à jour du score
     document.querySelectorAll('.player').forEach(player => {
       updateDisplay(player);
-      player.querySelectorAll('.buttons button').forEach(button => {
+      player.querySelectorAll('button').forEach(button => {
         button.addEventListener('click', () => {
-          if (button.hasAttribute('data-undo')) {
-            // Si une dernière modification a été enregistrée, on la soustrait du score
-            if (player.lastChange !== 0) {
-              let currentScore = parseInt(player.getAttribute('data-score'));
-              currentScore -= player.lastChange;
-              player.setAttribute('data-score', currentScore);
-              updateDisplay(player);
-              // Réinitialise la dernière modification pour éviter un double effacement
-              player.lastChange = 0;
+          let score = parseInt(player.getAttribute('data-score'));
+          if (button.hasAttribute('data-custom')) {
+            let customValue = prompt("Entrez une valeur personnalisée :");
+            if (customValue !== null && !isNaN(customValue)) {
+              score += parseInt(customValue);
             }
           } else {
-            let addition = 0;
-            if (button.hasAttribute('data-custom')) {
-              let customValue = prompt("Entrez une valeur personnalisée :");
-              if (customValue !== null && !isNaN(customValue)) {
-                addition = parseInt(customValue);
-              }
-            } else {
-              addition = parseInt(button.getAttribute('data-value'));
-            }
-            let currentScore = parseInt(player.getAttribute('data-score'));
-            currentScore += addition;
-            player.setAttribute('data-score', currentScore);
-            updateDisplay(player);
-            // Enregistre cette modification comme dernière opération
-            player.lastChange = addition;
+            score += parseInt(button.getAttribute('data-value'));
           }
+          player.setAttribute('data-score', score);
+          updateDisplay(player);
         });
       });
     });

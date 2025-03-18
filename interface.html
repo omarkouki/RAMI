@@ -101,6 +101,7 @@
         <button data-value="30">+30</button>
         <button data-value="100">+100</button>
         <button data-custom="true">+</button>
+        <button data-undo="true">Effacer</button>
       </div>
       <div class="stars"></div>
     </div>
@@ -112,6 +113,7 @@
         <button data-value="30">+30</button>
         <button data-value="100">+100</button>
         <button data-custom="true">+</button>
+        <button data-undo="true">Effacer</button>
       </div>
       <div class="stars"></div>
     </div>
@@ -123,6 +125,7 @@
         <button data-value="30">+30</button>
         <button data-value="100">+100</button>
         <button data-custom="true">+</button>
+        <button data-undo="true">Effacer</button>
       </div>
       <div class="stars"></div>
     </div>
@@ -134,6 +137,7 @@
         <button data-value="30">+30</button>
         <button data-value="100">+100</button>
         <button data-custom="true">+</button>
+        <button data-undo="true">Effacer</button>
       </div>
       <div class="stars"></div>
     </div>
@@ -149,10 +153,12 @@
       player4: "Joueur 4"
     };
 
-    // Affectation des noms aux éléments correspondants
+    // Affectation des noms aux éléments correspondants et initialisation de la pile d'annulation
     document.querySelectorAll('.player').forEach((player, index) => {
       const nameElem = player.querySelector('.playerName');
       nameElem.textContent = playerNames['player' + (index + 1)];
+      // On initialise la pile avec le score initial (0)
+      player.undoStack = [0];
     });
 
     // Création d'une croix animée en SVG (animation ligne par ligne)
@@ -192,22 +198,36 @@
       }
     }
 
-    // Ajout des événements sur les boutons pour la mise à jour du score
+    // Gestion des boutons pour la modification du score et annulation du dernier changement
     document.querySelectorAll('.player').forEach(player => {
       updateDisplay(player);
-      player.querySelectorAll('button').forEach(button => {
+      player.querySelectorAll('.buttons button').forEach(button => {
         button.addEventListener('click', () => {
-          let score = parseInt(player.getAttribute('data-score'));
-          if (button.hasAttribute('data-custom')) {
-            let customValue = prompt("Entrez une valeur personnalisée :");
-            if (customValue !== null && !isNaN(customValue)) {
-              score += parseInt(customValue);
+          // Bouton "Effacer" pour annuler la dernière modification
+          if (button.hasAttribute('data-undo')) {
+            if (player.undoStack.length > 1) {
+              // Retire le dernier score et revient à l'état précédent
+              player.undoStack.pop();
+              let previousScore = player.undoStack[player.undoStack.length - 1];
+              player.setAttribute('data-score', previousScore);
+              updateDisplay(player);
             }
           } else {
-            score += parseInt(button.getAttribute('data-value'));
+            // Sauvegarde l'état actuel avant modification
+            let currentScore = parseInt(player.getAttribute('data-score'));
+            // On ajoute le score actuel à la pile d'annulation
+            player.undoStack.push(currentScore);
+            if (button.hasAttribute('data-custom')) {
+              let customValue = prompt("Entrez une valeur personnalisée :");
+              if (customValue !== null && !isNaN(customValue)) {
+                currentScore += parseInt(customValue);
+              }
+            } else {
+              currentScore += parseInt(button.getAttribute('data-value'));
+            }
+            player.setAttribute('data-score', currentScore);
+            updateDisplay(player);
           }
-          player.setAttribute('data-score', score);
-          updateDisplay(player);
         });
       });
     });

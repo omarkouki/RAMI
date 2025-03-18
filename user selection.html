@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuration du jeu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('https://media.istockphoto.com/id/1864437299/fr/vectoriel/illustration-vectorielle-de-fond-de-table-verte-de-poker-terrain-de-jeu-r%C3%A9aliste-pour-le.jpg?s=612x612&w=0&k=20&c=Cbie8F-Wj5PZdoq3vZRModg6TVlIaDeCQUzwJfsyza8=') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    form {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+    input {
+      padding: 8px;
+      border-radius: 4px;
+      border: none;
+      margin-top: 5px;
+      width: 250px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      background: #006400;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #228B22;
+    }
+    #langButton {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 8px 15px;
+      font-size: 14px;
+      background: #444;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <button id="langButton">عربي</button>
+  <h1 id="title">Configuration du jeu</h1>
+  <form id="playerForm">
+    <label id="playerLabel" for="playerInput">Joueur 1 :</label>
+    <input type="text" id="playerInput" name="playerInput" required>
+    <button type="button" id="nextButton">Suivant</button>
+    <button type="submit" id="playButton" style="display: none;">Jouer</button>
+  </form>
+
+  <script>
+    const translations = {
+      fr: {
+        title: "Configuration du jeu",
+        player: "Joueur",
+        next: "Suivant",
+        play: "Jouer",
+        lang: "عربي"
+      },
+      ar: {
+        title: "إعداد اللعبة",
+        player: "اللاعب",
+        next: "التالي",
+        play: "العب",
+        lang: "Français"
+      }
+    };
+    
+    let currentLang = 'fr';
+    const langButton = document.getElementById('langButton');
+    const title = document.getElementById('title');
+    const playerLabel = document.getElementById('playerLabel');
+    const nextButton = document.getElementById('nextButton');
+    const playButton = document.getElementById('playButton');
+    const playerInput = document.getElementById('playerInput');
+    
+    function updateLanguage() {
+      title.textContent = translations[currentLang].title;
+      playerLabel.textContent = `${translations[currentLang].player} ${currentPlayer} :`;
+      nextButton.textContent = translations[currentLang].next;
+      playButton.textContent = translations[currentLang].play;
+      langButton.textContent = translations[currentLang].lang;
+    }
+    
+    langButton.addEventListener('click', () => {
+      currentLang = currentLang === 'fr' ? 'ar' : 'fr';
+      updateLanguage();
+    });
+    
+    const playerNames = {};
+    let currentPlayer = 1;
+    const totalPlayers = 4;
+    
+    nextButton.addEventListener('click', function() {
+      if (playerInput.value.trim() !== "") {
+        playerNames[`player${currentPlayer}`] = playerInput.value;
+        playerInput.value = "";
+        currentPlayer++;
+        
+        if (currentPlayer > totalPlayers) {
+          nextButton.style.display = 'none';
+          playButton.style.display = 'inline-block';
+          playerLabel.style.display = 'none';
+          playerInput.style.display = 'none';
+          playerInput.removeAttribute('required'); // Remove required attribute
+        } else {
+          playerLabel.textContent = `${translations[currentLang].player} ${currentPlayer} :`;
+        }
+      }
+    });
+    
+    document.getElementById('playerForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      console.log('Form submitted'); // Debugging statement
+      sessionStorage.setItem('playerNames', JSON.stringify(playerNames));
+      console.log('Player names saved to session storage'); // Debugging statement
+      window.location.href = "interface.html"; // Use relative path
+      console.log('Redirecting to interface.html'); // Debugging statement
+    });
+  </script>
+</body>
+</html>

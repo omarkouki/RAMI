@@ -22,25 +22,29 @@
     .container {
       flex: 1;
       display: grid;
-      gap: 0.5vh;
+      gap: 1vh;
       padding: 0.5vh;
-      height: 90vh; /* Reduce container height */
-    }
-    /* Grid layout based on player count */
-    .container.four-players {
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      height: 90vh;
+      grid-template-areas: 
+        "p1 p2"
+        "button button"
+        "p3 p4";
+      grid-template-rows: 1fr auto 1fr;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
     }
     .container.two-players {
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: 1fr;
+      grid-template-areas: 
+        "p1 p2"
+        "button button";
+      grid-template-rows: 1fr auto;
     }
     .player {
       display: flex;
       flex-direction: column;
       padding: 0.5vh;
       height: auto;
-      max-height: 40vh; /* Limit player section height */
+      max-height: 40vh;
       border: 2px solid rgba(255,255,255,0.8);
       background: rgba(0,0,0,0.3);
       position: relative;
@@ -150,37 +154,30 @@
       to { stroke-dashoffset: 0; }
     }
     #validateRound {
+      grid-area: button;
+      justify-self: center;
+      align-self: center;
       font-size: min(2vw, 16px);
-      padding: 0.8vh 1.5vw;
-      margin: 0.5vh auto;
-      display: block;
+      padding: 1vh 2vw;
       border: none;
       background-color: #006400;
       color: #fff;
       border-radius: 5px;
       cursor: pointer;
       transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
     #validateRound:hover {
       background-color: #228B22;
       transform: scale(1.05);
-    }
-    /* Make lines responsive */
-    .horizontal-line {
-      height: 0.3vh;
-    }
-    .vertical-line {
-      width: 0.3vh;
     }
   </style>
 </head>
 <body>
   <div class="container" id="playersContainer">
     <!-- Les joueurs seront insérés ici dynamiquement selon le nombre sélectionné -->
+    <button id="validateRound">Valider le tour</button>
   </div>
-  
-  <!-- Bouton global pour valider le tour -->
-  <button id="validateRound">Valider le tour</button>
   
   <script>
     // Récupère le nombre de joueurs et les noms depuis sessionStorage

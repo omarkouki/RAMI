@@ -153,10 +153,7 @@
       border-radius: 5px;
       overflow-y: auto;
     }
-    #validateRound {
-      grid-area: button;
-      justify-self: center;
-      align-self: center;
+    #validateRound, #endGame {
       font-size: 2rem;
       padding: 1vh 2vw;
       border: none;
@@ -166,8 +163,9 @@
       cursor: pointer;
       transition: background-color 0.3s, transform 0.2s;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      margin: 0 10px; /* Add margin to separate buttons */
     }
-    #validateRound:hover {
+    #validateRound:hover, #endGame:hover {
       background-color: #228B22;
       transform: scale(1.05);
     }
@@ -177,6 +175,7 @@
   <div class="container" id="playersContainer">
     <!-- Les joueurs seront insérés ici dynamiquement selon le nombre sélectionné -->
     <button id="validateRound">Valider le tour</button>
+    <button id="endGame">Terminer le jeu</button>
   </div>
   
   <script>
@@ -388,6 +387,16 @@
         player.undoStack = [];
         updateDisplay(player);
       });
+    });
+
+    // Bouton "Terminer le jeu" : efface les données et redirige vers la page d'accueil
+    document.getElementById('endGame').addEventListener('click', () => {
+      // Efface les données du localStorage
+      for (let i = 1; i <= playersCount; i++) {
+        localStorage.removeItem('player' + i);
+      }
+      // Redirige vers la page d'accueil (remplacez 'index.html' par l'URL de votre page d'accueil)
+      window.location.href = 'userselection.html';
     });
   </script>
 </body>

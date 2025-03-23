@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Score Poker - Multi Tours</title>
   <style>
+    /* Styles généraux et arrière-plan */
     body {
       margin: 0;
       padding: 0;
@@ -12,12 +13,13 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      background: url('https://media.istockphoto.com/id/1864437299/fr/vectoriel/illustration-vectorielle-de-fond-de-table-verte-de-poker-terrain-de-jeu-réaliste-pour-le.jpg?s=612x612&w=0&k=20&c=Cbie8F-Wj5PZdoq3vZRModg6TVlIaDeCQUzwJfsyza8=') no-repeat center center fixed;
+      background: url('https://media.istockphoto.com/id/1864437299/fr/vectoriel/illustration-vectorielle-de-fond-de-table-verte-de-poker-terrain-de-jeu-r%C3%A9aliste-pour-le.jpg?s=612x612&w=0&k=20&c=Cbie8F-Wj5PZdoq3vZRModg6TVlIaDeCQUzwJfsyza8=') no-repeat center center fixed;
       background-size: cover;
       font-family: 'Courier New', Courier, monospace;
       color: #fff;
       position: relative;
       padding: 10px;
+      font-size: 18px; /* Taille de police globale augmentée */
     }
     .container {
       flex: 1;
@@ -47,27 +49,28 @@
       border: 2px solid rgba(255,255,255,0.8);
       background: rgba(0,0,0,0.3);
       position: relative;
+      margin: 5px;
     }
     .playerName {
-      font-size: min(2.5vw, 20px);
+      font-size: 2.5rem; /* Agrandit le titre */
       margin-bottom: 0.5vh;
       font-weight: bold;
     }
     .scoreDisplay {
-      font-size: min(2vw, 18px);
+      font-size: 2rem; /* Agrandit l'affichage du score */
       margin-bottom: 0.5vh;
       font-weight: bold;
     }
     .stars {
-      font-size: min(1.8vw, 14px);
+      font-size: 1.8rem;
       display: flex;
       gap: 5px;
       align-items: center;
       margin-bottom: 0.5vh;
     }
     .cross {
-      width: 20px;
-      height: 20px;
+      width: 30px;
+      height: 30px;
       display: inline-block;
     }
     .cross svg {
@@ -94,8 +97,8 @@
       margin-bottom: 0.5vh;
     }
     .buttons button {
-      font-size: min(1.8vw, 14px);
-      padding: 0.5vh 1vw;
+      font-size: 1.8rem; /* Taille de police agrandie pour les boutons */
+      padding: 1vh 2vw;
       flex: 0 1 auto;
       cursor: pointer;
       border: none;
@@ -143,7 +146,7 @@
       transform: scale(1.05);
     }
     .roundHistory {
-      font-size: min(1.8vw, 12px);
+      font-size: 1.8rem;
       max-height: 10vh;
       background: rgba(0,0,0,0.5);
       padding: 5px;
@@ -154,7 +157,7 @@
       grid-area: button;
       justify-self: center;
       align-self: center;
-      font-size: min(2vw, 16px);
+      font-size: 2rem;
       padding: 1vh 2vw;
       border: none;
       background-color: #006400;
@@ -177,9 +180,9 @@
   </div>
   
   <script>
-    // Récupère le nombre de joueurs et les noms depuis sessionStorage
-    const playersCount = sessionStorage.getItem('playersCount') || 4;
-    const storedNames = sessionStorage.getItem('playerNames');
+    // Récupère le nombre de joueurs et les noms depuis le localStorage
+    const playersCount = localStorage.getItem('playersCount') || 4;
+    const storedNames = localStorage.getItem('playerNames');
     const playerNames = storedNames ? JSON.parse(storedNames) : {
       player1: "Joueur 1",
       player2: "Joueur 2",
@@ -201,9 +204,18 @@
       const playerDiv = document.createElement('div');
       playerDiv.className = 'player';
       playerDiv.id = 'player' + i;
-      // Attributs pour stocker le score total et le score du tour
-      playerDiv.dataset.total = "0";
-      playerDiv.dataset.round = "0";
+      // Tente de charger les données sauvegardées dans le localStorage
+      const savedData = localStorage.getItem('player' + i);
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        playerDiv.dataset.total = data.total;
+        playerDiv.dataset.round = data.round;
+        playerDiv.roundHistoryArr = data.history;
+      } else {
+        playerDiv.dataset.total = "0";
+        playerDiv.dataset.round = "0";
+        playerDiv.roundHistoryArr = [];
+      }
       
       // Création des éléments internes
       const nameDiv = document.createElement('div');
@@ -212,7 +224,7 @@
       
       const scoreDiv = document.createElement('div');
       scoreDiv.className = 'scoreDisplay';
-      scoreDiv.textContent = "Total: 0 (Tour: 0)";
+      scoreDiv.textContent = "Total: " + playerDiv.dataset.total + " (Tour: " + playerDiv.dataset.round + ")";
       
       const starsDiv = document.createElement('div');
       starsDiv.className = 'stars';
@@ -221,28 +233,23 @@
       buttonsDiv.className = 'buttons';
       // Boutons d'addition (pour 2 joueurs, on supprime le bouton +50)
       if (playersCount == 2) {
-        // Bouton +30
         const btn30 = document.createElement('button');
         btn30.setAttribute('data-value', '30');
         btn30.textContent = "+30";
         buttonsDiv.appendChild(btn30);
-        // Bouton +100
         const btn100 = document.createElement('button');
         btn100.setAttribute('data-value', '100');
         btn100.textContent = "+100";
         buttonsDiv.appendChild(btn100);
       } else {
-        // Pour 4 joueurs, tous les boutons
         const btn30 = document.createElement('button');
         btn30.setAttribute('data-value', '30');
         btn30.textContent = "+30";
         buttonsDiv.appendChild(btn30);
-        
         const btn50 = document.createElement('button');
         btn50.setAttribute('data-value', '50');
         btn50.textContent = "+50";
         buttonsDiv.appendChild(btn50);
-        
         const btn100 = document.createElement('button');
         btn100.setAttribute('data-value', '100');
         btn100.textContent = "+100";
@@ -263,21 +270,20 @@
       const historyDiv = document.createElement('div');
       historyDiv.className = 'roundHistory';
       
-      // Assemblage
+      // Assemblage des éléments
       playerDiv.appendChild(nameDiv);
       playerDiv.appendChild(scoreDiv);
       playerDiv.appendChild(starsDiv);
       playerDiv.appendChild(buttonsDiv);
       playerDiv.appendChild(historyDiv);
       
-      // Initialisation des propriétés pour undo et historique
+      // Initialisation de la pile undo pour chaque joueur
       playerDiv.undoStack = [];
-      playerDiv.roundHistoryArr = [];
       
       playersContainer.appendChild(playerDiv);
     }
     
-    // Fonction pour mettre à jour l'affichage d'un joueur
+    // Fonction pour mettre à jour l'affichage d'un joueur et sauvegarder ses données
     function updateDisplay(playerElem) {
       const scoreDisplay = playerElem.querySelector('.scoreDisplay');
       const starsDisplay = playerElem.querySelector('.stars');
@@ -287,7 +293,7 @@
       
       scoreDisplay.textContent = 'Total: ' + total + ' (Tour: ' + round + ')';
       
-      // Mise à jour des croix pour le total (1 croix par tranche de 100)
+      // Mise à jour des croix (1 croix par tranche de 100)
       starsDisplay.innerHTML = "";
       let nbCrosses = Math.floor(total / 100);
       let reste = total % 100;
@@ -311,9 +317,17 @@
         });
         roundHistoryDiv.appendChild(ul);
       }
+      
+      // Sauvegarde des données du joueur dans le localStorage
+      const playerData = {
+        total: total,
+        round: round,
+        history: playerElem.roundHistoryArr
+      };
+      localStorage.setItem(playerElem.id, JSON.stringify(playerData));
     }
     
-    // Création d'une croix animée en SVG (pour chaque tranche de 100 du total)
+    // Création d'une croix animée en SVG
     function createCrossElement() {
       const span = document.createElement('span');
       span.className = 'cross';
@@ -326,13 +340,13 @@
       return span;
     }
     
-    // Gestion des boutons pour chaque joueur
+    // Gestion des clics sur les boutons pour chaque joueur
     document.querySelectorAll('.player').forEach(player => {
       updateDisplay(player);
       player.querySelectorAll('.buttons button').forEach(button => {
         button.addEventListener('click', () => {
           if (button.hasAttribute('data-undo')) {
-            // Bouton "Retour" : annule la dernière modification du tour
+            // Bouton "Retour" : annule la dernière modification
             if (player.undoStack.length > 0) {
               const lastAddition = player.undoStack.pop();
               let roundScore = parseInt(player.dataset.round);
@@ -360,7 +374,7 @@
       });
     });
     
-    // Bouton global "Valider le tour" : ajoute le score du tour au total, enregistre l'historique, et réinitialise le tour
+    // Bouton global "Valider le tour" : ajoute le score du tour au total et sauvegarde l'historique
     document.getElementById('validateRound').addEventListener('click', () => {
       document.querySelectorAll('.player').forEach(player => {
         let roundScore = parseInt(player.dataset.round);
@@ -369,7 +383,7 @@
         player.dataset.total = total;
         // Enregistre le score du tour dans l'historique
         player.roundHistoryArr.push(roundScore);
-        // Réinitialise le score du tour et la pile undo pour le prochain tour
+        // Réinitialise le score du tour et la pile undo
         player.dataset.round = 0;
         player.undoStack = [];
         updateDisplay(player);

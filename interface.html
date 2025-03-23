@@ -153,8 +153,14 @@
       border-radius: 5px;
       overflow-y: auto;
     }
-    #validateRound, #endGame {
-      font-size: 2rem;
+    .buttons-container {
+      grid-area: button;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #validateRound {
+      font-size: 1.5rem; /* Reduced font size */
       padding: 1vh 2vw;
       border: none;
       background-color: #006400;
@@ -165,8 +171,24 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
       margin: 0 10px; /* Add margin to separate buttons */
     }
-    #validateRound:hover, #endGame:hover {
+    #validateRound:hover {
       background-color: #228B22;
+      transform: scale(1.05);
+    }
+    #endGame {
+      font-size: 1.5rem; /* Reduced font size */
+      padding: 1vh 2vw;
+      border: none;
+      background-color: #FF0000; /* Red color */
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      margin: 0 10px; /* Add margin to separate buttons */
+    }
+    #endGame:hover {
+      background-color: #B22222;
       transform: scale(1.05);
     }
   </style>
@@ -174,8 +196,10 @@
 <body>
   <div class="container" id="playersContainer">
     <!-- Les joueurs seront insérés ici dynamiquement selon le nombre sélectionné -->
-    <button id="validateRound">Valider le tour</button>
-    <button id="endGame">Terminer le jeu</button>
+    <div class="buttons-container">
+      <button id="validateRound">Valider le tour</button>
+      <button id="endGame">Terminer le jeu</button>
+    </div>
   </div>
   
   <script>
@@ -391,12 +415,14 @@
 
     // Bouton "Terminer le jeu" : efface les données et redirige vers la page d'accueil
     document.getElementById('endGame').addEventListener('click', () => {
-      // Efface les données du localStorage
-      for (let i = 1; i <= playersCount; i++) {
-        localStorage.removeItem('player' + i);
+      if (confirm("Êtes-vous sûr de vouloir terminer le jeu ? Toutes les données seront effacées.")) {
+        // Efface les données du localStorage
+        for (let i = 1; i <= playersCount; i++) {
+          localStorage.removeItem('player' + i);
+        }
+        // Redirige vers la page d'accueil (remplacez 'userselection.html' par l'URL de votre page d'accueil)
+        window.location.href = 'index.html';
       }
-      // Redirige vers la page d'accueil (remplacez 'index.html' par l'URL de votre page d'accueil)
-      window.location.href = 'index.html';
     });
   </script>
 </body>

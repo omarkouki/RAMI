@@ -1,13 +1,13 @@
+<!-- interface.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>Score Poker - Multi Tours</title>
   <style>
-    /* Styles généraux et arrière-plan */
     body {
       margin: 0;
-      padding: 0;
+      padding: 10px;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
@@ -17,9 +17,8 @@
       background-size: cover;
       font-family: 'Courier New', Courier, monospace;
       color: #fff;
+      font-size: 18px;
       position: relative;
-      padding: 10px;
-      font-size: 18px; /* Taille de police globale augmentée */
     }
     .container {
       flex: 1;
@@ -33,7 +32,6 @@
         "p3 p4";
       grid-template-rows: 1fr auto 1fr;
       grid-template-columns: 1fr 1fr;
-      position: relative;
     }
     .container.two-players {
       grid-template-areas: 
@@ -45,19 +43,17 @@
       display: flex;
       flex-direction: column;
       padding: 0.5vh;
-      height: auto;
       border: 2px solid rgba(255,255,255,0.8);
       background: rgba(0,0,0,0.3);
-      position: relative;
       margin: 5px;
     }
     .playerName {
-      font-size: 2.5rem; /* Agrandit le titre */
+      font-size: 2.5rem;
       margin-bottom: 0.5vh;
       font-weight: bold;
     }
     .scoreDisplay {
-      font-size: 2rem; /* Agrandit l'affichage du score */
+      font-size: 2rem;
       margin-bottom: 0.5vh;
       font-weight: bold;
     }
@@ -97,9 +93,8 @@
       margin-bottom: 0.5vh;
     }
     .buttons button {
-      font-size: 1.8rem; /* Taille de police agrandie pour les boutons */
+      font-size: 1.8rem;
       padding: 1vh 2vw;
-      flex: 0 1 auto;
       cursor: pointer;
       border: none;
       transition: background-color 0.3s, transform 0.2s;
@@ -159,269 +154,250 @@
       justify-content: center;
       align-items: center;
     }
-    #validateRound {
-      font-size: 1.5rem; /* Reduced font size */
+    #validateRound, #endGame {
+      font-size: 1.5rem;
       padding: 1vh 2vw;
       border: none;
-      background-color: #006400;
       color: #fff;
       border-radius: 5px;
       cursor: pointer;
       transition: background-color 0.3s, transform 0.2s;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      margin: 0 10px; /* Add margin to separate buttons */
+      margin: 0 10px;
+    }
+    #validateRound {
+      background-color: #006400;
     }
     #validateRound:hover {
       background-color: #228B22;
-      transform: scale(1.05);
     }
     #endGame {
-      font-size: 1.5rem; /* Reduced font size */
-      padding: 1vh 2vw;
-      border: none;
-      background-color: #FF0000; /* Red color */
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s, transform 0.2s;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      margin: 0 10px; /* Add margin to separate buttons */
+      background-color: #FF0000;
     }
     #endGame:hover {
       background-color: #B22222;
-      transform: scale(1.05);
+    }
+
+    /* Modal pour saisie personnalisée */
+    #customModal {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+    }
+    #customModal .modal-content {
+      background: #222;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    #customValueInput {
+      font-size: 1.5rem;
+      padding: 5px;
+      width: 6rem;
+    }
+    #customModal button {
+      margin: 10px 5px 0;
+      padding: 8px 16px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="container" id="playersContainer">
-    <!-- Les joueurs seront insérés ici dynamiquement selon le nombre sélectionné -->
     <div class="buttons-container">
       <button id="validateRound">Valider le tour</button>
       <button id="endGame">Terminer le jeu</button>
     </div>
   </div>
-  
+
+  <!-- Modal personnalisée -->
+  <div id="customModal">
+    <div class="modal-content">
+      <p>Entrez une valeur personnalisée :</p>
+      <input id="customValueInput" type="number" inputmode="numeric" />
+      <div>
+        <button id="customOk">OK</button>
+        <button id="customCancel">Annuler</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Récupère le nombre de joueurs et les noms depuis le localStorage
-    const playersCount = localStorage.getItem('playersCount') || 4;
-    const storedNames = localStorage.getItem('playerNames');
-    const playerNames = storedNames ? JSON.parse(storedNames) : {
-      player1: "Joueur 1",
-      player2: "Joueur 2",
-      player3: "Joueur 3",
-      player4: "Joueur 4"
+    // Récupération config
+    const playersCount = parseInt(localStorage.getItem('playersCount'), 10) || 4;
+    const storedNames  = localStorage.getItem('playerNames');
+    const playerNames  = storedNames ? JSON.parse(storedNames) : {
+      player1: "Joueur 1", player2: "Joueur 2",
+      player3: "Joueur 3", player4: "Joueur 4"
     };
 
     const playersContainer = document.getElementById('playersContainer');
-    
-    // Détermine la classe de container en fonction du nombre de joueurs
-    if (playersCount == 2) {
+    if (playersCount === 2) {
       playersContainer.classList.add("two-players");
     } else {
       playersContainer.classList.add("four-players");
     }
-    
-    // Crée dynamiquement les divs pour chaque joueur
+
+    // Crée les joueurs
     for (let i = 1; i <= playersCount; i++) {
-      const playerDiv = document.createElement('div');
-      playerDiv.className = 'player';
-      playerDiv.id = 'player' + i;
-      // Tente de charger les données sauvegardées dans le localStorage
-      const savedData = localStorage.getItem('player' + i);
-      if (savedData) {
-        const data = JSON.parse(savedData);
-        playerDiv.dataset.total = data.total;
-        playerDiv.dataset.round = data.round;
-        playerDiv.roundHistoryArr = data.history;
-      } else {
-        playerDiv.dataset.total = "0";
-        playerDiv.dataset.round = "0";
-        playerDiv.roundHistoryArr = [];
-      }
-      
-      // Création des éléments internes
-      const nameDiv = document.createElement('div');
-      nameDiv.className = 'playerName';
-      nameDiv.textContent = playerNames['player' + i];
-      
-      const scoreDiv = document.createElement('div');
-      scoreDiv.className = 'scoreDisplay';
-      scoreDiv.textContent = "Total: " + playerDiv.dataset.total + " (Tour: " + playerDiv.dataset.round + ")";
-      
-      const starsDiv = document.createElement('div');
-      starsDiv.className = 'stars';
-      
-      const buttonsDiv = document.createElement('div');
-      buttonsDiv.className = 'buttons';
-      // Boutons d'addition (pour 2 joueurs, on supprime le bouton +50)
-      if (playersCount == 2) {
-        const btn30 = document.createElement('button');
-        btn30.setAttribute('data-value', '30');
-        btn30.textContent = "+30";
-        buttonsDiv.appendChild(btn30);
-        const btn100 = document.createElement('button');
-        btn100.setAttribute('data-value', '100');
-        btn100.textContent = "+100";
-        buttonsDiv.appendChild(btn100);
-      } else {
-        const btn30 = document.createElement('button');
-        btn30.setAttribute('data-value', '30');
-        btn30.textContent = "+30";
-        buttonsDiv.appendChild(btn30);
-        const btn50 = document.createElement('button');
-        btn50.setAttribute('data-value', '50');
-        btn50.textContent = "+50";
-        buttonsDiv.appendChild(btn50);
-        const btn100 = document.createElement('button');
-        btn100.setAttribute('data-value', '100');
-        btn100.textContent = "+100";
-        buttonsDiv.appendChild(btn100);
-      }
-      // Bouton personnalisé
-      const btnCustom = document.createElement('button');
-      btnCustom.setAttribute('data-custom', 'true');
-      btnCustom.textContent = "Perso";
-      buttonsDiv.appendChild(btnCustom);
-      // Bouton Retour (undo)
-      const btnUndo = document.createElement('button');
-      btnUndo.setAttribute('data-undo', 'true');
-      btnUndo.textContent = "Retour";
-      buttonsDiv.appendChild(btnUndo);
-      
-      // Zone pour l'historique des tours
-      const historyDiv = document.createElement('div');
-      historyDiv.className = 'roundHistory';
-      
-      // Assemblage des éléments
-      playerDiv.appendChild(nameDiv);
-      playerDiv.appendChild(scoreDiv);
-      playerDiv.appendChild(starsDiv);
-      playerDiv.appendChild(buttonsDiv);
-      playerDiv.appendChild(historyDiv);
-      
-      // Initialisation de la pile undo pour chaque joueur
-      playerDiv.undoStack = [];
-      
-      playersContainer.appendChild(playerDiv);
+      const p = document.createElement('div');
+      p.className = 'player';
+      p.id = 'player' + i;
+      const saved = JSON.parse(localStorage.getItem('player' + i) || '{"total":0,"round":0,"history":[]}');
+      p.dataset.total       = saved.total;
+      p.dataset.round       = saved.round;
+      p.roundHistoryArr     = saved.history;
+      p.undoStack           = [];
+
+      // Inner HTML
+      p.innerHTML = `
+        <div class="playerName">${playerNames['player'+i]}</div>
+        <div class="scoreDisplay"></div>
+        <div class="stars"></div>
+        <div class="buttons"></div>
+        <div class="roundHistory"></div>
+      `;
+      // Ajout des boutons
+      const btnsDiv = p.querySelector('.buttons');
+      // +30 always
+      ['30','50','100'].forEach(val => {
+        if (playersCount===2 && val==='50') return;
+        const b = document.createElement('button');
+        b.dataset.value = val;
+        b.textContent   = '+'+val;
+        btnsDiv.appendChild(b);
+      });
+      // perso
+      const bc = document.createElement('button');
+      bc.dataset.custom = 'true';
+      bc.textContent    = 'Perso';
+      btnsDiv.appendChild(bc);
+      // undo
+      const bu = document.createElement('button');
+      bu.dataset.undo  = 'true';
+      bu.textContent  = 'Retour';
+      btnsDiv.appendChild(bu);
+
+      playersContainer.appendChild(p);
     }
-    
-    // Fonction pour mettre à jour l'affichage d'un joueur et sauvegarder ses données
-    function updateDisplay(playerElem) {
-      const scoreDisplay = playerElem.querySelector('.scoreDisplay');
-      const starsDisplay = playerElem.querySelector('.stars');
-      const roundHistoryDiv = playerElem.querySelector('.roundHistory');
-      let total = parseInt(playerElem.dataset.total);
-      let round = parseInt(playerElem.dataset.round);
-      
-      scoreDisplay.textContent = 'Total: ' + total + ' (Tour: ' + round + ')';
-      
-      // Mise à jour des croix (1 croix par tranche de 100)
-      starsDisplay.innerHTML = "";
-      let nbCrosses = Math.floor(total / 100);
-      let reste = total % 100;
-      for (let i = 0; i < nbCrosses; i++) {
-        starsDisplay.appendChild(createCrossElement());
+
+    // Modal elements
+    const modal         = document.getElementById('customModal');
+    const inputField    = document.getElementById('customValueInput');
+    const btnOk         = document.getElementById('customOk');
+    const btnCancel     = document.getElementById('customCancel');
+    let currentCustomPlayer = null;
+
+    btnOk.addEventListener('click', () => {
+      if (currentCustomPlayer) {
+        const v = parseInt(inputField.value, 10);
+        if (!isNaN(v)) {
+          currentCustomPlayer.undoStack.push(v);
+          currentCustomPlayer.dataset.round = parseInt(currentCustomPlayer.dataset.round,10) + v;
+          updateDisplay(currentCustomPlayer);
+        }
       }
-      if (reste > 0) {
-        const resteSpan = document.createElement('span');
-        resteSpan.textContent = " (" + reste + ")";
-        starsDisplay.appendChild(resteSpan);
-      }
-      
-      // Mise à jour de l'historique des tours
-      roundHistoryDiv.innerHTML = "";
-      if (playerElem.roundHistoryArr.length > 0) {
+      modal.style.display = 'none';
+    });
+    btnCancel.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    // Fonction d'affichage et sauvegarde
+    function updateDisplay(p) {
+      const total   = parseInt(p.dataset.total, 10);
+      const round   = parseInt(p.dataset.round, 10);
+      p.querySelector('.scoreDisplay').textContent = `Total: ${total} (Tour: ${round})`;
+      // crosses
+      const stars = p.querySelector('.stars');
+      stars.innerHTML = '';
+      const full = Math.floor(total/100), rem = total % 100;
+      for (let i=0; i<full; i++) stars.appendChild(createCrossElement());
+      if (rem>0) stars.insertAdjacentText('beforeend', ` (${rem})`);
+      // history
+      const hdiv = p.querySelector('.roundHistory');
+      hdiv.innerHTML = '';
+      if (p.roundHistoryArr.length) {
         const ul = document.createElement('ul');
-        playerElem.roundHistoryArr.forEach((score, idx) => {
+        p.roundHistoryArr.forEach((s,i)=>{
           const li = document.createElement('li');
-          li.textContent = "Tour " + (idx + 1) + " : " + score;
+          li.textContent = `Tour ${i+1} : ${s}`;
           ul.appendChild(li);
         });
-        roundHistoryDiv.appendChild(ul);
+        hdiv.appendChild(ul);
       }
-      
-      // Sauvegarde des données du joueur dans le localStorage
-      const playerData = {
-        total: total,
-        round: round,
-        history: playerElem.roundHistoryArr
-      };
-      localStorage.setItem(playerElem.id, JSON.stringify(playerData));
+      // save
+      localStorage.setItem(p.id, JSON.stringify({
+        total, round, history: p.roundHistoryArr
+      }));
     }
-    
-    // Création d'une croix animée en SVG
+
     function createCrossElement() {
       const span = document.createElement('span');
       span.className = 'cross';
       span.innerHTML = `
         <svg viewBox="0 0 30 30">
-          <line x1="5" y1="5" x2="25" y2="25" />
-          <line class="second" x1="25" y1="5" x2="5" y2="25" />
-        </svg>
-      `;
+          <line x1="5" y1="5" x2="25" y2="25"/>
+          <line class="second" x1="25" y1="5" x2="5" y2="25"/>
+        </svg>`;
       return span;
     }
-    
-    // Gestion des clics sur les boutons pour chaque joueur
+
+    // Gestion des boutons
     document.querySelectorAll('.player').forEach(player => {
       updateDisplay(player);
       player.querySelectorAll('.buttons button').forEach(button => {
         button.addEventListener('click', () => {
-          if (button.hasAttribute('data-undo')) {
-            // Bouton "Retour" : annule la dernière modification
-            if (player.undoStack.length > 0) {
-              const lastAddition = player.undoStack.pop();
-              let roundScore = parseInt(player.dataset.round);
-              roundScore -= lastAddition;
-              player.dataset.round = roundScore;
+          if (button.dataset.undo) {
+            // undo
+            if (player.undoStack.length) {
+              const last = player.undoStack.pop();
+              player.dataset.round = parseInt(player.dataset.round,10) - last;
               updateDisplay(player);
             }
-          } else {
-            let addition = 0;
-            if (button.hasAttribute('data-custom')) {
-              let customValue = prompt("Entrez une valeur personnalisée :");
-              if (customValue !== null && !isNaN(customValue)) {
-                addition = parseInt(customValue);
-              }
-            } else {
-              addition = parseInt(button.getAttribute('data-value'));
-            }
-            player.undoStack.push(addition);
-            let roundScore = parseInt(player.dataset.round);
-            roundScore += addition;
-            player.dataset.round = roundScore;
+          }
+          else if (button.dataset.custom) {
+            // show modal
+            currentCustomPlayer = player;
+            inputField.value = '';
+            modal.style.display = 'flex';
+            inputField.focus();
+          }
+          else {
+            // fixed value
+            const v = parseInt(button.dataset.value,10);
+            player.undoStack.push(v);
+            player.dataset.round = parseInt(player.dataset.round,10) + v;
             updateDisplay(player);
           }
         });
       });
     });
-    
-    // Bouton global "Valider le tour" : ajoute le score du tour au total et sauvegarde l'historique
+
+    // Valider le tour
     document.getElementById('validateRound').addEventListener('click', () => {
-      document.querySelectorAll('.player').forEach(player => {
-        let roundScore = parseInt(player.dataset.round);
-        let total = parseInt(player.dataset.total);
-        total += roundScore;
-        player.dataset.total = total;
-        // Enregistre le score du tour dans l'historique
-        player.roundHistoryArr.push(roundScore);
-        // Réinitialise le score du tour et la pile undo
-        player.dataset.round = 0;
-        player.undoStack = [];
-        updateDisplay(player);
+      document.querySelectorAll('.player').forEach(p => {
+        const r = parseInt(p.dataset.round,10);
+        p.dataset.total = parseInt(p.dataset.total,10) + r;
+        p.roundHistoryArr.push(r);
+        p.dataset.round = 0;
+        p.undoStack = [];
+        updateDisplay(p);
       });
     });
 
-    // Bouton "Terminer le jeu" : efface les données et redirige vers la page d'accueil
+    // Terminer le jeu
     document.getElementById('endGame').addEventListener('click', () => {
       if (confirm("Êtes-vous sûr de vouloir terminer le jeu ? Toutes les données seront effacées.")) {
-        // Efface les données du localStorage
-        for (let i = 1; i <= playersCount; i++) {
-          localStorage.removeItem('player' + i);
+        for (let i=1; i<=playersCount; i++) {
+          localStorage.removeItem('player'+i);
         }
-        // Redirige vers la page d'accueil (remplacez 'userselection.html' par l'URL de votre page d'accueil)
-        window.location.href = 'index.html';
+        window.location.href = 'userselection.html';
       }
     });
   </script>

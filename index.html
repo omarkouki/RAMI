@@ -1,3 +1,4 @@
+<!-- userselection.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -116,15 +117,15 @@
       form.style.display = "block";
     });
 
-    document.getElementById('playerForm').addEventListener('submit', function(e){
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
       const names = {};
       for (let i = 1; i <= playersCount; i++) {
-        names['player' + i] = document.getElementById('player' + i).value;
+        names['player' + i] = document.getElementById('player' + i).value.trim() || `Joueur ${i}`;
       }
-      // Stocker le nombre de joueurs et les noms dans sessionStorage
-      sessionStorage.setItem('playersCount', playersCount);
-      sessionStorage.setItem('playerNames', JSON.stringify(names));
+      // On stocke dans localStorage pour que interface.html les lise
+      localStorage.setItem('playersCount', playersCount);
+      localStorage.setItem('playerNames', JSON.stringify(names));
       window.location.href = "interface.html";
     });
   </script>
